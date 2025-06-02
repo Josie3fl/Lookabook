@@ -1,4 +1,3 @@
-
 import { AuthenticationError } from 'apollo-server-express';
 import User from '../models/User';
 import { signToken } from '../services/auth';
@@ -51,6 +50,11 @@ const resolvers = {
         { new: true }
       );
       return updatedUser;
+    },
+  },
+  User: {
+    bookCount: (parent: any) => {
+      return parent.savedBooks?.length || 0;
     },
   },
 };
