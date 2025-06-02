@@ -4,6 +4,7 @@ import db from './config/connection.js';
 import routes from './routes/index.js';
 import { ApolloServer } from 'apollo-server-express';
 import { typeDefs, resolvers } from './schemas';
+import { authMiddleware } from './utils/auth';
 
 
 const app = express();
@@ -41,3 +42,5 @@ const startServer = async () => {
     });
   });
 };
+
+startServer();

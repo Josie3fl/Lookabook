@@ -41,6 +41,7 @@
 import jwt from 'jsonwebtoken';
 import { Request } from 'express';
 import dotenv from 'dotenv';
+import { authenticateToken } from '../../services/auth.js';
 dotenv.config();
 
 interface JwtPayload {
