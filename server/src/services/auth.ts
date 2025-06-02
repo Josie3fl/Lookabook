@@ -6,10 +6,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-interface JwtPayload {
+interface MyJwtPayload extends jwt.JwtPayload {
   _id: string;
-  username: string;
-  email: string;
 }
 
 const secret = process.env.JWT_SECRET_KEY || '';

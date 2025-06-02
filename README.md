@@ -16,7 +16,7 @@ To get the development environment running locally, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/look-a-book.git
+   git clone https://github.com/Josie3fl/Lookabook.git
    cd look-a-book
 
 2. Install dependencies for both client and server:
