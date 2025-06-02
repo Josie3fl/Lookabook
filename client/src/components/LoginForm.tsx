@@ -1,17 +1,120 @@
-// see SignupForm.js for comments
+// // see SignupForm.js for comments
+// import { useState } from 'react';
+// import type { ChangeEvent, FormEvent } from 'react';
+// import { Form, Button, Alert } from 'react-bootstrap';
+
+// import { loginUser } from '../utils/API';
+// import Auth from '../utils/auth';
+// import type { User } from '../models/User';
+
+// // biome-ignore lint/correctness/noEmptyPattern: <explanation>
+// const LoginForm = ({}: { handleModalClose: () => void }) => {
+//   const [userFormData, setUserFormData] = useState<User>({ username: '', email: '', password: '', savedBooks: [] });
+//   const [validated] = useState(false);
+//   const [showAlert, setShowAlert] = useState(false);
+
+//   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+//     const { name, value } = event.target;
+//     setUserFormData({ ...userFormData, [name]: value });
+//   };
+
+//   const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
+//     event.preventDefault();
+
+//     // check if form has everything (as per react-bootstrap docs)
+//     const form = event.currentTarget;
+//     if (form.checkValidity() === false) {
+//       event.preventDefault();
+//       event.stopPropagation();
+//     }
+
+//     try {
+//       const response = await loginUser(userFormData);
+
+//       if (!response.ok) {
+//         throw new Error('something went wrong!');
+//       }
+
+//       const { token } = await response.json();
+//       Auth.login(token);
+//     } catch (err) {
+//       console.error(err);
+//       setShowAlert(true);
+//     }
+
+//     setUserFormData({
+//       username: '',
+//       email: '',
+//       password: '',
+//       savedBooks: [],
+//     });
+//   };
+
+//   return (
+//     <>
+//       <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
+//         <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert} variant='danger'>
+//           Something went wrong with your login credentials!
+//         </Alert>
+//         <Form.Group className='mb-3'>
+//           <Form.Label htmlFor='email'>Email</Form.Label>
+//           <Form.Control
+//             type='text'
+//             placeholder='Your email'
+//             name='email'
+//             onChange={handleInputChange}
+//             value={userFormData.email || ''}
+//             required
+//           />
+//           <Form.Control.Feedback type='invalid'>Email is required!</Form.Control.Feedback>
+//         </Form.Group>
+
+//         <Form.Group className='mb-3'>
+//           <Form.Label htmlFor='password'>Password</Form.Label>
+//           <Form.Control
+//             type='password'
+//             placeholder='Your password'
+//             name='password'
+//             onChange={handleInputChange}
+//             value={userFormData.password || ''}
+//             required
+//           />
+//           <Form.Control.Feedback type='invalid'>Password is required!</Form.Control.Feedback>
+//         </Form.Group>
+//         <Button
+//           disabled={!(userFormData.email && userFormData.password)}
+//           type='submit'
+//           variant='success'>
+//           Submit
+//         </Button>
+//       </Form>
+//     </>
+//   );
+// };
+
+// export default LoginForm;
+
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
+import { useMutation } from '@apollo/client';
 
-import { loginUser } from '../utils/API';
+import { LOGIN_USER } from '../utils/mutations';
 import Auth from '../utils/auth';
 import type { User } from '../models/User';
 
-// biome-ignore lint/correctness/noEmptyPattern: <explanation>
 const LoginForm = ({}: { handleModalClose: () => void }) => {
-  const [userFormData, setUserFormData] = useState<User>({ username: '', email: '', password: '', savedBooks: [] });
+  const [userFormData, setUserFormData] = useState<User>({
+    username: '',
+    email: '',
+    password: '',
+    savedBooks: [],
+  });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+
+  // Apollo mutation hook
+  const [login, { error }] = useMutation(LOGIN_USER);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -21,22 +124,22 @@ const LoginForm = ({}: { handleModalClose: () => void }) => {
   const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // check if form has everything (as per react-bootstrap docs)
     const form = event.currentTarget;
     if (form.checkValidity() === false) {
       event.preventDefault();
       event.stopPropagation();
+      return;
     }
 
     try {
-      const response = await loginUser(userFormData);
+      const { data } = await login({
+        variables: {
+          email: userFormData.email,
+          password: userFormData.password,
+        },
+      });
 
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
-
-      const { token } = await response.json();
-      Auth.login(token);
+      Auth.login(data.login.token);
     } catch (err) {
       console.error(err);
       setShowAlert(true);
@@ -53,9 +156,10 @@ const LoginForm = ({}: { handleModalClose: () => void }) => {
   return (
     <>
       <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
-        <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert} variant='danger'>
+        <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert || Boolean(error)} variant='danger'>
           Something went wrong with your login credentials!
         </Alert>
+
         <Form.Group className='mb-3'>
           <Form.Label htmlFor='email'>Email</Form.Label>
           <Form.Control
@@ -81,6 +185,7 @@ const LoginForm = ({}: { handleModalClose: () => void }) => {
           />
           <Form.Control.Feedback type='invalid'>Password is required!</Form.Control.Feedback>
         </Form.Group>
+
         <Button
           disabled={!(userFormData.email && userFormData.password)}
           type='submit'
@@ -93,3 +198,4 @@ const LoginForm = ({}: { handleModalClose: () => void }) => {
 };
 
 export default LoginForm;
+// This code defines a LoginForm component that allows users to log in using their email and password.
